@@ -29,7 +29,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":50
+                 "y":261
                 }, 
                 {
                  "height":0,
@@ -88,8 +88,8 @@
                  "type":"gunSpawn",
                  "visible":true,
                  "width":0,
-                 "x":250,
-                 "y":250
+                 "x":574,
+                 "y":313
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -101,7 +101,7 @@
  "nextobjectid":7,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.4.3",
+ "tiledversion":"1.7.2",
  "tileheight":100,
  "tilesets":[
         {
@@ -300,6 +300,6 @@
         }],
  "tilewidth":100,
  "type":"map",
- "version":1.4,
+ "version":"1.6",
  "width":20
 }
