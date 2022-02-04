@@ -98,7 +98,7 @@ class PathFindingScene extends Phaser.Scene {
         this.physics.add.overlap(this.player.sprite, this.gun, this.collectGun, null, this)
 
         //text
-        this.healthText = this.add.text(200,200, "Health",{fontFamily:'kenvector_future_thin'})
+        this.healthText = this.add.text(85,45, "Health",{fontFamily:'kenvector_future_thin'}).setFontSize(70)
 
         //Camera
         this.camera = this.cameras.getCamera('')
