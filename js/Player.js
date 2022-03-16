@@ -1,12 +1,12 @@
 class Player {
-    /** @type {Phaser.Scene} */
+    /** @type {PathFindingScene} */
     scene
     /** @type {Phaser.Physics.Arcade.Sprite} */
     sprite
     /** @type {number} */
     standardSpeed = 300
     /** @type {number} */
-    powerUpSpeed = 500
+    powerUpSpeed = 600
     /** @type {number} */
     currentSpeed
     /** @type {object} */
@@ -17,6 +17,18 @@ class Player {
     isDead = false
     /** @type {boolean} */
     hasGun = false
+    /** @type {number} */
+    ammo = 0
+    /** @type {number} */
+    health = 100
+    /** @type {number} */
+    maxHealth = this.health
+    /** @type {boolean} */
+    damage
+    /** @type {number} */
+    energyAmount = 100
+    /** @type {number} */
+    maxEnergy = this.energyAmount
 
     constructor(scene, x, y, texture) {
         this.scene = scene
@@ -32,7 +44,8 @@ class Player {
             w: Phaser.Input.Keyboard.KeyCodes.W,
             a: Phaser.Input.Keyboard.KeyCodes.A,
             s: Phaser.Input.Keyboard.KeyCodes.S,
-            d: Phaser.Input.Keyboard.KeyCodes.D
+            d: Phaser.Input.Keyboard.KeyCodes.D,
+            shift: Phaser.Input.Keyboard.KeyCodes.SHIFT
         })
         //speed controls setting the speed of the player
         this.currentSpeed = this.standardSpeed
@@ -41,6 +54,9 @@ class Player {
     update(time, delta) {
         //make sure player is alive
         if (!this.isDead) {
+            if(this.energyAmount > 100){
+                this.energyAmount = 100
+            }
 
             if (this.keys.a.isDown) {
                 //dissalow diagonal movement only horizontal and vertical - why does changing 0 change movement?
@@ -65,6 +81,24 @@ class Player {
             } else {
                 this.sprite.setVelocity(0, 0)
             }
+
+            //Player Sprinting and energy exughstion
+            if(this.keys.shift.isDown && this.energyAmount >= 1){
+                this.energyAmount -= 0.7
+                this.currentSpeed = this.powerUpSpeed
+                //@ts-ignore
+                this.scene.setMeterPercentage(this.energyAmount / this.maxEnergy, this.scene.staminaBar)
+            }else if(this.keys.shift.isDown && this.energyAmount == 0){
+                this.currentSpeed = this.standardSpeed
+            }
+            //when player has no energy
+            if(!this.keys.shift.isDown && this.energyAmount < 100){
+                this.energyAmount += 0.5
+                this.currentSpeed = this.standardSpeed
+                this.scene.setMeterPercentage(this.energyAmount / this.maxEnergy, this.scene.staminaBar)
+            }
+
+
             // rotating characters hitbox since player rotation does not rotate it
             //go into body
             if (this.sprite.body.velocity.x != 0) {
@@ -75,7 +109,8 @@ class Player {
             }
             //listen to spacebar - shooting
             //if has a gun and spacebar is pressed
-            if (this.hasGun && Phaser.Input.Keyboard.JustDown(this.spaceBar)) {
+            if (this.hasGun && Phaser.Input.Keyboard.JustDown(this.spaceBar) && this.ammo >= 1) {
+                this.ammo -- 
                 this.scene.events.emit('firebullet')
             }
         }

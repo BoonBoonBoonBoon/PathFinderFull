@@ -18,16 +18,38 @@ class PathFindingScene extends Phaser.Scene {
     bullets
     /** @type {Phaser.Cameras.Scene2D.Camera} */
     camera
+    /** @type {Phaser.Physics.Arcade.StaticGroup} */
+    ammoPickup
+    /** @type {Object} */
+    staminaBar = {}
+    /** @type {Object} */
+    healthBar = {}
     /** @type {Phaser.GameObjects.Text} */
     healthText
+    /** @type {Phaser.GameObjects.Text} */
+    scoreCount
+    /** @type {Phaser.GameObjects.Text} */
+    multiText
+    /** @type {Phaser.GameObjects.Text} */
+    wavecount
+    /** @type {Phaser.GameObjects.Text} */
+    ammoCount
+    /** @type {number} */
+    score = 0
+    /** @type {number} */
+    wave = 1
+    /** @type {number} */
+    scoreMultiplier = 1
+    /** @type {number} */
+    scoreCombonation = 0
+    /** @type {number} */
+    maxEnemies = 1
+
     constructor() {
         super({ key: 'pathFindingScene' })
     }
 
-    init() {
-        //width size that represents the bar 
-        this.fullWidth = 300
-    }
+    
 
     preload() {
         //tilemap and tileset
@@ -48,15 +70,23 @@ class PathFindingScene extends Phaser.Scene {
 
         //collectables
         this.load.image('redJewl', 'assets/red-jewel.png')
+        this.load.image('ammo', 'assets/bullets.png')
 
-        //Health Ui
+        //Health Ui Green
         this.load.image('left-cap', 'assets/barHorizontal_green_left.png')
         this.load.image('middle-cap', 'assets/barHorizontal_green_mid.png')
         this.load.image('right-cap', 'assets/barHorizontal_green_right.png')
+        //Health UI Whiite
+        this.load.image('left-cap-w', 'assets/barHorizontal_white_left.png')
+        this.load.image('middle-cap-w', 'assets/barHorizontal_white_left.png')
+        this.load.image('right-cap-w', 'assets/barHorizontal_white_left.png')
         //Ui Shadow
         this.load.image('left-cap-shadow', 'assets/barHorizontal_shadow_left.png')
         this.load.image('middle-cap-shadow', 'assets/barHorizontal_shadow_mid.png')
         this.load.image('right-cap-shadow', 'assets/barHorizontal_shadow_right.png')
+        this.load.image('left-cap-shadow2', 'assets/barHorizontal_shadow_left.png')
+        this.load.image('middle-cap-shadow2', 'assets/barHorizontal_shadow_mid.png')
+        this.load.image('right-cap-shadow2', 'assets/barHorizontal_shadow_right.png')
 
 
     }
@@ -92,13 +122,29 @@ class PathFindingScene extends Phaser.Scene {
 
             }
         }, this)
+
+        //ammo Spawn
+        let ammoSpawn = Utils.FindPoints(this.map, 'objectLayer', 'ammoSpawn')
+        this.ammoPickup = this.physics.add.staticGroup()
+        for (let point, i = 0; i < ammoSpawn.length; i++) {
+            point = ammoSpawn[i]
+            this.ammoPickup.create(point.x, point.y, 'ammo')
+        }
+
         //player has been created add collision
         this.physics.add.collider(this.player.sprite, groundAndWallsLayer)
         //player collide with gun
         this.physics.add.overlap(this.player.sprite, this.gun, this.collectGun, null, this)
+        //player collide with ammo
+        this.physics.add.overlap(this.player.sprite, this.ammoPickup, this.collectAmmo, null, this)
 
-        //text
-        this.healthText = this.add.text(85,45, "Health",{fontFamily:'kenvector_future_thin'}).setFontSize(70)
+        //Text UI
+        this.healthText = this.add.text(730, 50, "100", { fontFamily: 'kenvector_future_thin' }).setFontSize(40).setScrollFactor(0).setDepth(2)
+        this.scoreCount = this.add.text(250, 10, 'Score : 0', { fontFamily: 'kenvector_future_thin' }).setFontSize(40).setScrollFactor(0).setDepth(2)
+        this.wavecount = this.add.text(420, 10, 'Wave : 1', { fontFamily: 'kenvector_future_thin' }).setFontSize(40).setScrollFactor(0).setDepth(2)
+        this.ammoCount = this.add.text(1350, 10, 'Ammo : 0', { fontFamily: 'kenvector_future_thin' }).setFontSize(40).setScrollFactor(0).setDepth(2)
+        this.multiText = this.add.text(925, 10, ' x1', { fontFamily: 'kenvector_future_thin' }).setFontSize(40).setScrollFactor(0).setDepth(2)
+
 
         //Camera
         this.camera = this.cameras.getCamera('')
@@ -163,37 +209,77 @@ class PathFindingScene extends Phaser.Scene {
         //which tiles can be used by easystar
         this.finder.setAcceptableTiles(acceptableTiles)
 
-        //creating shadow bar
-        const y = 24
-        const x = 10
 
-        //background Shadow
+        //Shadow Bar
+
+        //creating shadow bar
+       
+        const y = 30
+        const x = 600
+ /*
         const leftShadowCap = this.add.image(x, y, 'left-cap-shadow').setOrigin(0, 0.5)
 
         const middleShaddowCap = this.add.image(leftShadowCap.x + leftShadowCap.width, y, 'middle-cap-shadow').setOrigin(0, 0.5)
         middleShaddowCap.displayWidth = this.fullWidth
 
         this.add.image(middleShaddowCap.x + middleShaddowCap.displayWidth, y, 'right-cap-shadow').setOrigin(0, 0.5)
+*/
+        //Second Shadow
+        const y2 = 30
+        const x2 = 1000
+/*
+        const leftShadowCap2 = this.add.image(x2, y2, 'left-cap-shadow2').setOrigin(0, 0.5)
 
-        //healthBar
-        this.leftCap = this.add.image(x, y, 'left-cap').setOrigin(0, 0.5)
+        const middleShaddowCap2 = this.add.image(leftShadowCap2.x + leftShadowCap2.width, y, 'middle-cap-shadow2').setOrigin(0, 0.5)
+        middleShaddowCap2.displayWidth = this.fullWidth
 
-        this.middle = this.add.image(this.leftCap.x + this.leftCap.width, y, 'middle-cap').setOrigin(0, 0.5)
+        this.add.image(middleShaddowCap2.x + middleShaddowCap2.displayWidth, y, 'right-cap-shadow2').setOrigin(0, 0.5)
+        */
 
-        this.rightCap = this.add.image(this.middle.x + this.middle.displayWidth, y, 'right-cap').setOrigin(0, 0.5)
+        //HealthBar First UI
+       this.healthBar.leftCap = this.add.image(x, y, 'left-cap').setOrigin(0, 0.5)
+        console.log()
+       this.healthBar.middle = this.add.image(this.healthBar.leftCap.x + this.healthBar.leftCap.width, y, 'middle-cap').setOrigin(0, 0.5)
 
-        this.setMeterPercentage(1)
+       this.healthBar.rightCap = this.add.image(this.healthBar.middle.x + this.healthBar.middle.displayWidth, y, 'right-cap').setOrigin(0, 0.5)
 
+       this.healthBar.fullWidth = 300
 
+       this.setMeterPercentage(0.9, this.healthBar)
+
+        //SecondBar Second UI
+        this.staminaBar.leftCap = this.add.image(x2, y2, 'left-cap-w').setOrigin(0, 0.5)
+
+        this.staminaBar.middle = this.add.image(this.staminaBar.leftCap.x + this.staminaBar.leftCap.width, y2, 'middle-cap-w').setOrigin(0, 0.5)
+
+        this.staminaBar.rightCap = this.add.image(this.staminaBar.middle.x + this.staminaBar.middle.displayWidth, y2, 'right-cap-w').setOrigin(0, 0.5)
+
+        this.staminaBar.fullWidth = 300
+
+        this.setMeterPercentage(1, this.staminaBar)
+console.log(this.player)
     }
 
-    setMeterPercentage(percent = 1) {
-        const width = this.fullWidth * percent
+    //HealthBar First UI
+/*
+    updateHealthBar(leftCap, middle, rightCap) {
+        leftCap = this.add.image(x, y, 'left-cap').setOrigin(0, 0.5)
 
-        this.middle.displayWidth = width
-        this.rightCap.x = this.middle.x + this.middle.displayWidth
+        middle = this.add.image(this.leftCap.x + this.leftCap.width, y, 'middle-cap').setOrigin(0, 0.5)
+
+        rightCap = this.add.image(this.middle.x + this.middle.displayWidth, y, 'right-cap').setOrigin(0, 0.5)
+
+        setMeterPercentage(1)
+    }
+*/
+    setMeterPercentage(percent = 1, Bar) {
+        const width = Bar.fullWidth * percent
+
+        Bar.middle.displayWidth = width
+        Bar.rightCap.x = Bar.middle.x + Bar.middle.displayWidth
     }
 
+    /*
     setMeterPercentageAnimated(percent = 1, duration = 1000) {
         const width = this.fullWidth * percent
         this.tweens.add({
@@ -210,6 +296,8 @@ class PathFindingScene extends Phaser.Scene {
             }
         })
     }
+*/
+
 
     findPath(point) {
         //point object has x and y in pixels
@@ -226,7 +314,7 @@ class PathFindingScene extends Phaser.Scene {
             if (path === null) {
                 console.warn("path not found")
             } else {
-                console.log("found path")
+                ("found path")
                 //call callback
                 callback(path)
             }
@@ -306,6 +394,8 @@ class PathFindingScene extends Phaser.Scene {
 
         //changing texture to gun held
         this.player.sprite.setTexture('playerGun')
+        //ammo spent
+        this.ammoCount.setText('Ammo : ' + this.player.ammo)
     }
     fireBullet() {
         //vector creates new object to fire bullet from correct placement
@@ -329,6 +419,13 @@ class PathFindingScene extends Phaser.Scene {
                 this.physics.add.collider(this.enemies[i].sprite, bullet, this.bulletHitEnemy, null, this)
             }
         }
+        //bullet decrement
+        this.ammoCount.setText('Ammo : ' + this.player.ammo)
+    }
+    collectAmmo(player, ammo) {
+        this.player.ammo += 20
+        this.ammoCount.setText('Ammo : ' + this.player.ammo)
+        ammo.destroy()
     }
     worldBoundsBullet(body) {
         //return bullet to 'pool'
@@ -351,25 +448,102 @@ class PathFindingScene extends Phaser.Scene {
         this.enemies.splice(index, 1)
         this.add.image(enemySprite.x, enemySprite.y, 'dead enemy').setRotation(enemySprite.rotation).setDepth(0)//add dead enemy image
         enemySprite.destroy()
-        if (!this.player.isDead && this.enemies.length < this.minEnemies) {
+        //Combonation Increment
+        this.scoreCombonation += 1
+        //Score Points
+        if (this.scoreMultiplier == 1) {
+            this.score += 1
+        } else if (this.scoreMultiplier == 2) {
+            this.score += 2
+        } else if (this.scoreMultiplier == 3) {
+            this.score += 3
+        } else if (this.scoreMultiplier == 4) {
+            this.score += 4
+        }
+        this.calculateCurrentWave()
+        // Score UI
+        this.scoreCount.setText('Score : ' + this.score)
+        //wave UI
+        this.wavecount.setText('Wave : ' + this.wave)
+        if (!this.player.isDead && this.enemies.length < this.maxEnemies) {
             this.onEnemySpawn()
         }
 
     }
+
+    calculateCurrentWave() {
+        // Wave increment
+        if (this.score >= 5) {
+            this.wave = 2
+            this.wavecount.setText('Wave : ' + this.wave)
+            if (this.maxEnemies < 2) {
+                this.onEnemySpawn()
+                this.maxEnemies++
+            }
+        }
+        if (this.score >= 10) {
+            this.wave = 3
+            this.wavecount.setText('Wave : ' + this.wave)
+            if (this.maxEnemies < 3) {
+                this.onEnemySpawn()
+                this.maxEnemies++
+            }
+        }
+        if (this.score >= 15) {
+            this.wave = 4
+            this.wavecount.setText('Wave : ' + this.wave)
+            if (this.maxEnemies < 4) {
+                this.onEnemySpawn()
+                this.maxEnemies++
+            }
+        }
+        if (this.score >= 20) {
+            this.wave = 5
+            this.wavecount.setText('Wave : ' + this.wave)
+            if (this.maxEnemies < 5) {
+                this.onEnemySpawn()
+                this.maxEnemies++
+            }
+        }
+    }
     collideEnemy(player, enemySprite) {
-        this.tweens.killAll()
-        this.physics.pause()
-        this.player.isDead = true
-        this.player.sprite.setTint(0xFF0000)
+        if (this.player.health == 0) {
+            this.tweens.killAll()
+            this.physics.pause()
+            this.player.isDead = true
+            this.player.sprite.setTint(0xFF0000)
+            //player takes damage
+        } else if (!this.player.damage) {
+            this.player.health -= 10
+            //reset multiplyer
+            this.scoreMultiplier = 1
+            this.scoreCombonation = 0
+            //damage cooldown
+            this.player.damage = true
+            setTimeout(() => { this.player.damage = false }, 2000)
+            this.setMeterPercentage(this.player.health / this.player.maxHealth, this.healthBar)
+        }
 
     }
     update(time, delta) {
+        //this.ammoCount.setText('Ammo : ' + this.player.ammo)
+        (this.ammoCount)
         //updates the players movement
         this.player.update(time, delta)
         //update enemies
         for (let i = 0; i < this.enemies.length; i++) {
             this.enemies[i].update(time, delta)
         }
+
+        // score multi
+        if (this.scoreCombonation >= 15) {
+            this.scoreMultiplier = 4
+        } else if (this.scoreCombonation >= 10) {
+            this.scoreMultiplier = 3
+        } else if (this.scoreCombonation >= 5) {
+            this.scoreMultiplier = 2
+        }
+
     }
 }
 // dugeon crawler

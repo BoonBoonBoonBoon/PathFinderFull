@@ -88,8 +88,32 @@
                  "type":"gunSpawn",
                  "visible":true,
                  "width":0,
-                 "x":574,
-                 "y":313
+                 "x":358,
+                 "y":351
+                }, 
+                {
+                 "height":0,
+                 "id":7,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"ammoSpawn",
+                 "visible":true,
+                 "width":0,
+                 "x":448,
+                 "y":352
+                }, 
+                {
+                 "height":0,
+                 "id":8,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"healthSpawn",
+                 "visible":true,
+                 "width":0,
+                 "x":546,
+                 "y":352
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -98,7 +122,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":7,
+ "nextobjectid":10,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.7.2",
